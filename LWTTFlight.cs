@@ -35,13 +35,13 @@ namespace prg2assignment
         // CalculateFees to include request fee
         public override double CalculateFees()
         {
-            return base.CalculateFees() + requestFee;
+            return base.CalculateFees() + 500;
         }
 
-        // display request fee
+        // display
         public override string ToString()
         {
-            return base.ToString() + $" Request Fee: ${requestFee:0.00}";
+            return base.ToString();  // same format as base class
         }
     }
 }

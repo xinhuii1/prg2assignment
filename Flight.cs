@@ -87,7 +87,7 @@ namespace prg2assignment
         }
 
         // display flight details
-        public virtual override string ToString()
+        public virtual string ToString()
         {
             return $"{FlightNumber, -15} {Origin, -25} {Destination, -25} {ExpectedTime:dd/MM/yyyy hh:mm tt}";
         }

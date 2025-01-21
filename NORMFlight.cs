@@ -27,6 +27,7 @@ namespace prg2assignment
             return base.CalculateFees();
         }
 
+        // display
         public override string ToString()
         {
             return base.ToString(); // same format as base class
