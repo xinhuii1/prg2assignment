@@ -1,4 +1,10 @@
-﻿using System;
+﻿//==========================================================
+// Student Number	: S10269252
+// Student Name	: Han Xin Hui
+// Partner Name	: Belle Chong Qing Xi
+//==========================================================
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

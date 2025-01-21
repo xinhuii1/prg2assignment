@@ -4,6 +4,12 @@
 // Partner Name	: Belle Chong Qing Xi
 //==========================================================
 
+//==========================================================
+// Student Number	: S10269252
+// Student Name	: Han Xin Hui
+// Partner Name	: Belle Chong Qing Xi
+//==========================================================
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +18,8 @@ using System.Threading.Tasks;
 
 namespace prg2assignment
 {
-    // CFFTFlight inherits from Flight
-    class CFFTFlight : Flight
+    // LWWTFlight inherits from Flight
+    class LWTTFlight : Flight
     {
         // attribute
         private double requestFee;
@@ -26,7 +32,7 @@ namespace prg2assignment
         }
 
         // parameterized constructor
-        public CFFTFlight(string flightNumber, string origin, string destination, DateTime expectedTime, string status, double requestFee)
+        public LWTTFlight(string flightNumber, string origin, string destination, DateTime expectedTime, string status, double requestFee)
             : base(flightNumber, origin, destination, expectedTime, status)
         {
             RequestFee = requestFee;
@@ -41,7 +47,7 @@ namespace prg2assignment
         // display request fee
         public override string ToString()
         {
-            return base.ToString() + $"Request Fee: ${requestFee:0.00}";
+            return base.ToString() + $" Request Fee: ${requestFee:0.00}";
         }
     }
 }
