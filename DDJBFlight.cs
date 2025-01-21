@@ -12,8 +12,8 @@ using System.Threading.Tasks;
 
 namespace prg2assignment
 {
-    // LWWTFlight inherits from Flight
-    class LWTTFlight : Flight
+    // DDJBFlight inherits from Flight
+    class DDJBFlight : Flight
     {
         // attribute
         private double requestFee;
@@ -26,7 +26,7 @@ namespace prg2assignment
         }
 
         // parameterized constructor
-        public LWTTFlight(string flightNumber, string origin, string destination, DateTime expectedTime, string status, double requestFee)
+        public DDJBFlight(string flightNumber, string origin, string destination, DateTime expectedTime, string status, double requestFee)
             : base(flightNumber, origin, destination, expectedTime, status)
         {
             RequestFee = requestFee;
