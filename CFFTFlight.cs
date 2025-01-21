@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace prg2assignment
+{
+    // CFFTFlight inherits from Flight
+    class CFFTFlight : Flight
+    {
+        // attribute
+        private double requestFee;
+
+        // property
+        public double RequestFee
+        {
+            get { return requestFee; }
+            set { requestFee = value; }
+        }
+
+        // parameterized constructor
+        public CFFTFlight(string flightNumber, string origin, string destination, DateTime expectedTime, string status, double requestFee)
+            : base(flightNumber, origin, destination, expectedTime, status)
+        {
+            RequestFee = requestFee;
+        }
+
+        // CalculateFees to include request fee
+        public override double CalculateFees()
+        {
+            return base.CalculateFees() + requestFee;
+        }
+
+        // display request fee
+        public override string ToString()
+        {
+            return base.ToString() + $"requestFee: ${requestFee:0.00}";
+        }
+    }
+}
