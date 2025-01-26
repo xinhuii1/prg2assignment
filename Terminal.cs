@@ -49,7 +49,7 @@ namespace prg2assignment
         {
             foreach (var airline in airlines.Values)               // Loop through all airlines, values represent different airlines
             {
-                if (airline.Flights.Contains(flight.FlightNumber)) // Check if the flight number exists in the airline'sdict
+                if (airline.Flights.ContainsKey(flight.FlightNumber)) // Check if the flight number exists in the airline'sdict
                 {
                     return airline;                                // Return the matching airline
                 }

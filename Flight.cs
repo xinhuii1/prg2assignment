@@ -88,7 +88,8 @@ namespace prg2assignment
         // display flight details
         public virtual string ToString()
         {
-            return $"{FlightNumber, -15} {Origin, -25} {Destination, -25} {ExpectedTime:dd/MM/yyyy hh:mm tt}";
+            string time = ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower();
+            return $"{FlightNumber, -15} {Origin, -25} {Destination, -20} {time}";  // ensure AM/PM is in lower case to match the sample outout
         }
     }
 }
