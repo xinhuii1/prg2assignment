@@ -15,7 +15,7 @@ namespace prg2assignment
     // LWWTFlight inherits from Flight
     class LWTTFlight : Flight
     {
-        // attribute
+        // attributes and properties
         private double requestFee;
 
         // property

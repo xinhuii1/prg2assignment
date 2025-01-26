@@ -15,10 +15,8 @@ namespace prg2assignment
     // DDJBFlight inherits from Flight
     class DDJBFlight : Flight
     {
-        // attribute
+        // attributes and properties
         private double requestFee;
-
-        // property
         public double RequestFee
         {
             get { return requestFee; }

@@ -15,10 +15,9 @@ namespace prg2assignment
 {
     abstract class Flight
     {
-        // attribute
+        // attribute and properties
         private string flightNumber;
 
-        // property
         public string FlightNumber
         {
             get { return flightNumber; }
@@ -67,7 +66,7 @@ namespace prg2assignment
             Status = status;
         }
 
-        // method to calculate the total fees
+        // method to calculate the total fees (no longer abstract)as i
         public virtual double CalculateFees()
         {
             double boardingFee = 300; // base fee for all boarding gates

@@ -15,10 +15,9 @@ namespace prg2assignment
     // CFFTFlight inherits from Flight
     class CFFTFlight : Flight
     {
-        // attribute
+        // attributes and properties
         private double requestFee;
 
-        // property
         public double RequestFee
         {
             get { return requestFee; }
