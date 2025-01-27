@@ -5,6 +5,7 @@
 //==========================================================
 
 using prg2assignment;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // method to display menu
 void DisplayMenu()
@@ -99,6 +100,80 @@ void ListAllFlights(Dictionary<string, Flight> flightsDict)
     }
 }
 
+// 5)	Assign a boarding gate to a flight
+// - prompt the user for the Flight Number
+// - display the basic information of the selected Flight, including the Special Request Code (if any)
+// - prompt the user for the Boarding Gate
+// - check that the selected Boarding Gate is not assigned to another Flight (Note: For Basic Features, there is no need to validate if the Special Request Codes between Flights and Boarding Gates match)
+//   - if the Boarding Gate selected is already assigned to another flight, display a message that the Boarding Gate is already assigned and repeat the previous step
+// - display the basic information of the selected Flight, Special Request Code (if any), and Boarding Gate entered
+// - prompt the user if they would like to update the Status of the Flight, with a new Status of any of the following options: “Delayed”, “Boarding”, or “On Time” [Y] or set the Status of the Flight to the default of “On Time” and continue to the next step if [N]
+// - dsplay a message to indicate a successful Boarding Gate assignment
+
+void AssignBoardingGate(Dictionary<string, Flight> flightDict)
+{
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Assign a Boarding Gate to a Flight");
+    Console.WriteLine("=============================================");
+
+    // prompt user for the flight number
+    Console.WriteLine("Enter Flight Number:");
+    string flightNo = Console.ReadLine().ToUpper();  // ensure the flight number is in uppercase
+
+    // check if the flight number exists
+    if (flightDict.ContainsKey(flightNo))
+    {
+        Flight selectedFlight = flightDict[flightNo];
+
+        // prompt user for the boarding gate name
+        Console.WriteLine("Enter Boarding Gate Name: ");
+        string gateName = Console.ReadLine().ToUpper(); // ensure the boarding gate name is in uppercase
+
+        // check if the boarding gate is already assigned to another flight no or not
+        if (selectedFlight.BoardingGate != null)
+        {
+            // message to display if the boarding gate is assigned already
+            Console.WriteLine("Boarding Gate {0} is already assigned to Flight {1}. Please choose another gate.", selectedFlight.BoardingGate, selectedFlight.FlightNumber);
+            return; // return if the gate is already assigned
+        }
+
+        // assign the boarding gate
+        selectedFlight.BoardingGate = gateName;
+
+        // display flight information
+        Console.WriteLine("Flight Number: {0}", selectedFlight.FlightNumber);
+        Console.WriteLine("Origin: {0}", selectedFlight.Origin);
+        Console.WriteLine("Destination: {0}", selectedFlight.Destination);
+        Console.WriteLine("Expected Time: {0}", selectedFlight.ExpectedTime);
+        Console.WriteLine("Special Request Code : {0}", selectedFlight.Status);
+        Console.WriteLine("Boarding Gate Name: {0}", selectedFlight.BoardingGate);
+        Console.WriteLine("Supports DDJB: {0}", selectedFlight is DDJBFlight);
+        Console.WriteLine("Supports CFFT: {0}", selectedFlight is CFFTFlight);
+        Console.WriteLine("Supports LWTT: {0}", selectedFlight is LWTTFlight);
+
+        // prompt the user to update the flight status
+        Console.WriteLine("Would you like to update the status of the flight? (Y/N): ");
+        string status = Console.ReadLine().ToUpper(); // ensure status is in uppercase
+
+        if (status == "Y")
+        {
+            Console.WriteLine("1. Delayed");
+            Console.WriteLine("2. Boarding");
+            Console.WriteLine("3. On Time: ");
+            Console.WriteLine("Please select the new status of the flight:");
+            int statusUpdate = Convert.ToInt32(Console.ReadLine());
+
+            Console.WriteLine("Flight {0} has been assigned to Boarding Gate {1}!", selectedFlight.FlightNumber, gateName);
+        }
+
+        else
+        {
+            Console.WriteLine("Flight Number {0} not found. Please try again!", flightNo);
+        }
+    }
+
+}
+
 
 
 // main program starts here
@@ -114,6 +189,11 @@ while (true)
     if (option == 1)
     {
         ListAllFlights(flightDict);
+    }
+
+    if (option == 3)
+    {
+        AssignBoardingGate(flightDict);
     }
 }
 
