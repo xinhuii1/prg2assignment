@@ -23,6 +23,40 @@ void DisplayMenu()
     Console.WriteLine("0. Exit");
     Console.WriteLine(); // leave a new line
 }
+//feature 1
+Dictionary<string, Airline> airlines = new Dictionary<string, Airline>();
+
+void LoadAirlines(Dictionary<string, Airline> airlines)
+{
+    string[] csvLines = File.ReadAllLines("airlines.csv");
+
+    for (int i = 1; i < csvLines.Length; i++) // Skip the header row
+    {
+        string[] data = csvLines[i].Split(',');
+
+        if (data.Length == 2) // Ensure the row has exactly 2 columns
+        {
+            string name = data[0].Trim(); // Airline Name
+            string code = data[1].Trim(); // Airline Code
+
+            try
+            {
+                Airline newAirline = new Airline(name, code); // Create Airline object
+                airlines.Add(code, newAirline);              // Add to dictionary
+                Console.WriteLine($"Airline {name} with code {code} created and added.");
+            }
+            catch (ArgumentException)
+            {
+                Console.WriteLine($"Airline with code {code} already exists in the dictionary.");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Invalid data on line {i + 1}: {csvLines[i]}");
+        }
+    }
+}
+
 
 // basic feature 2)	Load files (flights)
 // - load the flights.csv file
