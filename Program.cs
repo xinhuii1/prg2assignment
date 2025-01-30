@@ -24,7 +24,7 @@ void DisplayMenu()
     Console.WriteLine(); // leave a new line
 }
 //feature 1
-Dictionary<string, Airline> airlines = new Dictionary<string, Airline>();
+
 
 void LoadAirlines(Dictionary<string, Airline> airlines)
 {
@@ -56,6 +56,37 @@ void LoadAirlines(Dictionary<string, Airline> airlines)
         }
     }
 }
+
+void LoadBoardingGates(Terminal terminal)
+{
+    string[] csvLines = File.ReadAllLines("boardinggates.csv");
+
+    for (int i = 1; i < csvLines.Length; i++) // Skip the header row
+    {
+        string[] data = csvLines[i].Split(',');
+
+        if (data.Length == 4) // Ensure the row has exactly 4 columns
+        {
+            string gateName = data[0].Trim();           // Gate Name
+            bool supportsCFFT = Convert.ToBoolean(data[1].Trim()); // Support for CFFT
+            bool supportsDDJB = Convert.ToBoolean(data[2].Trim()); // Support for DDJB
+            bool supportsLWTT = Convert.ToBoolean(data[3].Trim()); // Support for LWTT
+
+            BoardingGate newGate = new BoardingGate(gateName, supportsCFFT, supportsDDJB, supportsLWTT);
+
+            // Call AddBoardingGate and log only if the gate already exists
+            if (!terminal.AddBoardingGate(newGate))
+            {
+                Console.WriteLine($"Boarding Gate {gateName} already exists in the dictionary.");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Invalid data on line {i + 1}: {csvLines[i]}");
+        }
+    }
+}
+
 
 
 // basic feature 2)	Load files (flights)
@@ -131,6 +162,20 @@ void ListAllFlights(Dictionary<string, Flight> flightsDict)
     foreach (Flight flight in flightDict.Values)
     {
         Console.WriteLine(flight.ToString());
+    }
+}
+
+//FEATURE 4
+void DisplayBoardingGates(Dictionary<string, BoardingGate> boardingGates)
+{
+    Console.WriteLine("\n=============================================");
+    Console.WriteLine("List of Boarding Gates for Changi Airport Terminal 5");
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Gate Name\tDDJB\tCFFT\tLWTT");
+
+    foreach (var gate in boardingGates.Values)
+    {
+        Console.WriteLine(gate.ToString()); 
     }
 }
 

@@ -51,7 +51,7 @@ namespace prg2assignment
 
         public override string ToString()
         {
-            return $"{GateName} {SupportsDDJB} {SupportsCFFT} {SupportsLWTT}";
+            return $"{GateName}\t{SupportsDDJB}\t{SupportsCFFT}\t{SupportsLWTT}";
         }
     }
 }
