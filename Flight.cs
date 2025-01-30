@@ -66,7 +66,12 @@ namespace prg2assignment
             Status = status;
         }
 
-        // method to calculate the total fees (no longer abstract)as i
+        public Airline Airline   // this property ensure that the flight know which airline it belongs to
+        {
+            get; set;  
+        }
+
+        // method to calculate the total fees (no longer abstract)
         public virtual double CalculateFees()
         {
             double boardingFee = 300; // base fee for all boarding gates

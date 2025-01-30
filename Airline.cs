@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace prg2assignment
 {
-    internal class Airline
+    class Airline
     {
         public string Name { get; set; }                                // Properties
         public string Code { get; set; }
