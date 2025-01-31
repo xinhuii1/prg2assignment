@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace prg2assignment
 {
-    internal class Terminal
+    class Terminal
     {
         public string TerminalName { get; set; } 
         private Dictionary<string, Airline> airlines;
@@ -23,9 +23,14 @@ namespace prg2assignment
             gateFees = new Dictionary<string, double>();
         }
 
+        public Dictionary<string, BoardingGate> BoardingGates
+        {
+            get { return boardingGates; }
+        }
+
         public bool AddAirline(Airline airline)                  // check whether the code existed, if no add to airlines dict
         {
-            if (airlines.ContainsKey(airline.Code) == false) 
+            if (airlines.ContainsKey(airline.Code)) 
             {
                 airlines.Add(airline.Code, airline); 
                 return true;
@@ -45,11 +50,11 @@ namespace prg2assignment
             return false;
         }
 
-        public Airline GetAirlineFromFlight(Flight flight)
+        public Airline GetAirlineFromFlight(string flightNumber)
         {
             foreach (var airline in airlines.Values)               // Loop through all airlines, values represent different airlines
             {
-                if (airline.Flights.ContainsKey(flight.FlightNumber)) // Check if the flight number exists in the airline'sdict
+                if (airline.Flights.ContainsKey(flightNumber)) // Check if the flight number exists in the airline'sdict
                 {
                     return airline;                                // Return the matching airline
                 }

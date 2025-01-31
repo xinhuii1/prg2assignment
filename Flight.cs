@@ -70,6 +70,12 @@ namespace prg2assignment
         {
             get; set;  
         }
+        
+        public BoardingGate BoardingGate
+        {
+            get; set;
+        }
+
 
         // method to calculate the total fees (no longer abstract)
         public virtual double CalculateFees()
@@ -94,7 +100,7 @@ namespace prg2assignment
         public virtual string ToString()
         {
             string time = ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower();
-            return $"{FlightNumber, -15} {Origin, -25} {Destination, -20} {time}";  // ensure AM/PM is in lower case to match the sample outout
+            return $"{FlightNumber, -15} {Origin, -25} {Destination, -20} {time}";  // AM/PM is in lower case to match the sample outout
         }
     }
 }
