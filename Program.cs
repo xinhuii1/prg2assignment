@@ -176,7 +176,12 @@ void LoadFlights(Terminal terminal)
 
             flight.AirlineCode = airlineCode;
             terminal.Flights.Add(flightNumber, flight);
-            airline.Flights.Add(flightNumber, flight);
+            bool added = airline.AddFlight(flight);
+
+            if (!added)
+            {
+                Console.WriteLine($"Error: Flight {flightNumber} already exists for {airline.Name}. Skipping duplicate entry.");
+            }
 
         }
     }
@@ -448,8 +453,27 @@ void CreateNewFlight(Terminal terminal)
         newFlight.AirlineCode = airlineCode; // Set the airline code for the flight
 
         // Add the new flight object to the Terminal's Flights dictionary
-        terminal.Flights.Add(flightNumber, newFlight);
-        Console.WriteLine($"Flight {flightNumber} has been successfully added to the terminal.");
+        if (!terminal.Airlines.ContainsKey(airlineCode))
+        {
+            Console.WriteLine($"Error: Airline code {airlineCode} does not exist.");
+            return;
+        }
+
+        Airline airline = terminal.Airlines[airlineCode];
+
+        bool added = airline.AddFlight(newFlight);
+
+        if (added)
+        {
+            terminal.Flights.Add(flightNumber, newFlight);
+            Console.WriteLine($"Flight {flightNumber} has been successfully added.");
+            AppendFlight(flightNumber, origin, destination, expectedTime, requestCode);
+        }
+        else
+        {
+            Console.WriteLine($"Error: Flight {flightNumber} already exists in {airline.Name}. Flight not added.");
+        }
+
 
         // Append the new flight details to the flights.csv file
         AppendFlight(flightNumber, origin, destination, expectedTime, requestCode);
