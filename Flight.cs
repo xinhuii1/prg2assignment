@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace prg2assignment
 {
-    abstract class Flight
+    abstract class Flight : IComparable<Flight> 
     {
         // attribute and properties
         private string flightNumber;
@@ -68,6 +68,11 @@ namespace prg2assignment
             Status = status;
         }
 
+        public int CompareTo(Flight other)
+        {
+            if (this == other) return 1;
+            return this.ExpectedTime.CompareTo(other.ExpectedTime);
+        }
 
         // method to calculate the total fees (no longer abstract)
         public virtual double CalculateFees()
