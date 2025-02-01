@@ -51,7 +51,7 @@ namespace prg2assignment
 
         public override string ToString()
         {
-            return $"{GateName}\t{SupportsDDJB}\t{SupportsCFFT}\t{SupportsLWTT}";
+            return string.Format("{0,-12}{1,-10}{2,-10}{3,-10}", GateName, SupportsDDJB, SupportsCFFT, SupportsLWTT);
         }
     }
 }

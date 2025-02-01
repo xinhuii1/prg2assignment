@@ -24,7 +24,6 @@ namespace prg2assignment
         {
             if (Flights.ContainsKey(flight.FlightNumber))               // Check if the flight already exists in the dictionary
             {
-                Console.WriteLine($"Flight {flight.FlightNumber} already exists in the dictionary.");
                 return false;
             }
             Flights.Add(flight.FlightNumber, flight);                   // Add the flight to dict
@@ -58,7 +57,7 @@ namespace prg2assignment
 
         public override string ToString()
         {
-            return $"{Code} - {Name} (Flights: {Flights.Count})";
+            return $"{Code} - {Name} ";
 
         }
     }
