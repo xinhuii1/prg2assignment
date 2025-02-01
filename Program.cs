@@ -171,6 +171,7 @@ void LoadFlights(Terminal terminal)
 
             flight.AirlineCode = airlineCode;
             terminal.Flights.Add(flightNumber, flight);
+            airline.Flights.Add(flightNumber, flight);
 
             Console.WriteLine($"Added flight {flightNumber} ({origin} → {destination})");
         }
@@ -202,9 +203,10 @@ void ListAllFlights(Terminal terminal)
         if (terminal.Airlines.ContainsKey(airlineCode))
         {
             airlineName = terminal.Airlines[airlineCode].Name;
+            Console.WriteLine("{0, -15} {1, -25} {2, -20} {3, -20} {4}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower());
         }
 
-        Console.WriteLine("{0, -15} {1, -25} {2, -20} {3, -20} {4}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower());
+        
     }
 }
 
@@ -333,22 +335,53 @@ void AssignBoardingGate(Terminal terminal)
 
 //Feature 6
 //Feature 7
-void DisplayFullFlightDetails(Terminal terminal)
+void DisplayAirline(Terminal terminal)
 {
     Console.WriteLine("=============================================");
     Console.WriteLine("List of Airlines for Changi Airport Terminal 5");
     Console.WriteLine("=============================================");
-
-    // ✅ Print Table Header (Ensure it matches `ToString()` formatting)
     Console.WriteLine("{0,-15}{1,-25}", "Airline Code", "Airline Name");
 
-    // ✅ Iterate over Airlines and use ToString()
+ 
     foreach (var airline in terminal.Airlines.Values)
     {
         Console.WriteLine(airline.ToString()); // ✅ Uses `ToString()` from Airline.cs
     }
+    if (terminal.Flights.Count == 0)
+    {
+        Console.WriteLine("No flights to display, the list is empty.");
+        return;
+    }
+
+    Console.Write("Enter 2-letter airline code: ");
+
+    var inputCode = Console.ReadLine().ToUpper();
+    Airline selectedAirline = terminal.Airlines[inputCode];
+    Console.WriteLine("=============================================");
+    Console.WriteLine($"List of Flights for {selectedAirline.Name}");
+    Console.WriteLine("=============================================");
+    Console.WriteLine("{0,-15} {1,-25} {2,-20} {3, -20} {4, -20}", "Flight Number", "Airline Name", "Origin", "Destination", "Expected Departure/Arrival Time");
+    
+
+    foreach (var flight in selectedAirline.Flights.Values)
+    {
+        Console.WriteLine("{0,-15} {1,-25} {2,-20} {3,-20} {4}",
+        flight.FlightNumber, selectedAirline.Name,
+        flight.Origin, flight.Destination,
+        flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower());
+
+    }
+
 }
 
+//Feature 8
+void ModifyFlightDetails(Terminal terminal)
+{
+    DisplayAirline(terminal);
+    Console.WriteLine("Choose an existing Flight to modify or delete:");
+    string flightNumber = Console.ReadLine();
+
+}
 
 // main program starts here
 Terminal terminal = new Terminal("Changi Airport Terminal 5");
@@ -386,6 +419,11 @@ while (true)
     else if (option == 4)
     {
         // Call this when user selects option 2 (List Boarding Gates)
+    }
+
+    else if (option == 5)
+    {
+        DisplayAirline(terminal);
     }
 
 }
