@@ -7,6 +7,7 @@
 using prg2assignment;
 using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.NetworkInformation;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
@@ -763,6 +764,47 @@ void ListFlightsBySchedule(Terminal terminal)
                 "", "Scheduled", "", "", "", "");
         }
     }
+}
+
+// advance feature (a)
+void ProcessUnassignedFlights(Terminal terminal)
+{
+    Queue<Flight> unassignedFlights = new Queue<Flight>();
+
+    foreach(Flight flight in terminal.Flights.Values)
+    {
+        bool isAssigned = false;
+        foreach(BoardingGate gate in terminal.BoardingGates.Values)
+        {
+            if (gate.AssignedFlight == flight)
+            { 
+                isAssigned = true;
+                break;
+            }
+        }
+
+        if (!isAssigned)
+        {
+            unassignedFlights.Enqueue(flight);
+        }
+    }
+
+    int unassignedFlightCount = unassignedFlights.Count;
+    Console.WriteLine($"Total unassigned flights: {unassignedFlightCount}");
+
+    List<BoardingGate> availableGates = new List<BoardingGate>();
+    foreach (BoardingGate gate in terminal.BoardingGates.Values)
+    {
+        if (gate.AssignedFlight == null)
+        {
+            availableGates.Add(gate);
+        }
+    }
+
+    int unassignedGateCount = availableGates.Count;
+    Console.WriteLine($"Total unassigned boarding gates: {unassignedGateCount}");
+
+    int assignedFlights = 0;
 }
 
 
