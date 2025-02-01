@@ -651,5 +651,6 @@ while (true)
     else
     {
         Console.WriteLine("Goodbye!");
+        break;
     }
 }
