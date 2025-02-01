@@ -21,7 +21,13 @@ namespace prg2assignment
         public string FlightNumber
         {
             get { return flightNumber; }
-            set { flightNumber = value; }
+            set
+            {
+                // validate that flight number is not empty
+                if (string.IsNullOrEmpty(value))
+                    throw new ArgumentNullException("Flight Number cannot be empty.");
+                flightNumber = value;
+            }
         }
 
         private string origin;
@@ -29,7 +35,13 @@ namespace prg2assignment
         public string Origin
         {
             get { return origin; }
-            set { origin = value; }
+            set
+            {
+                // validate that origin is not empty
+                if (string.IsNullOrEmpty(value))
+                    throw new ArgumentNullException("Origin cannot be empty.");
+                origin = value;
+            }
         }
 
         private string destination;
@@ -37,7 +49,14 @@ namespace prg2assignment
         public string Destination
         {
             get { return destination; }
-            set { destination = value; }
+            set
+            {
+                // validate that origin is not empty
+                if (string.IsNullOrEmpty(value))
+                    throw new ArgumentNullException("Destination cannot be empty.");
+
+
+            }
         }
 
         private DateTime expectedTime;
@@ -45,7 +64,12 @@ namespace prg2assignment
         public DateTime ExpectedTime
         {
             get { return expectedTime; }
-            set { expectedTime = value; }
+            set
+            {
+                if (value == DateTime.MinValue)  // Validate that ExpectedTime is not set to the default value
+                    throw new ArgumentException("Expected time cannot be the default DateTime value.");
+                expectedTime = value;
+            }
         }
 
         private string status;

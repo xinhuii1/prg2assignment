@@ -5,6 +5,7 @@
 //==========================================================
 
 using prg2assignment;
+using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -109,10 +110,11 @@ void LoadAirlines(Terminal terminal)
 // Feature 2
 void LoadFlights(Terminal terminal)
 {
+    // check if the 'flights.csv' file exists
     if (!File.Exists("flights.csv"))
     {
         Console.WriteLine("Error: flights.csv file is missing!");
-        return;
+        return;  // exit the method if it is not found
     }
 
     string[] csvLines = File.ReadAllLines("flights.csv");
@@ -149,8 +151,10 @@ void LoadFlights(Terminal terminal)
                 continue; // Skip this flight if airline is not found
             }
 
+            // retrieve the airline object from the dictionary
             Airline airline = terminal.Airlines[airlineCode];
 
+            // intialization
             Flight flight;
             if (specialRequestCode == "CFFT")
             {
@@ -173,7 +177,6 @@ void LoadFlights(Terminal terminal)
             terminal.Flights.Add(flightNumber, flight);
             airline.Flights.Add(flightNumber, flight);
 
-            Console.WriteLine($"Added flight {flightNumber} ({origin} → {destination})");
         }
     }
 }
@@ -184,12 +187,14 @@ void LoadFlights(Terminal terminal)
 //Feature 3
 void ListAllFlights(Terminal terminal)
 {
+    // check if there are any flights in the terminal
     if (terminal.Flights.Count == 0)
     {
         Console.WriteLine("No flights to display, the list is empty.");
-        return;
+        return; //exit the method if no flights are available
     }
 
+    // display the header
     Console.WriteLine("=============================================");
     Console.WriteLine("List of All Flights");
     Console.WriteLine("=============================================");
@@ -197,11 +202,21 @@ void ListAllFlights(Terminal terminal)
 
     foreach (Flight flight in terminal.Flights.Values)
     {
+        // if airline name is not found, default name to not available
         string airlineName = "Not Available";
         string airlineCode = flight.FlightNumber.Substring(0, 2); // extract the first 2 characters
 
+        if (flight.ExpectedTime < DateTime.Now)
+        {
+            Console.WriteLine($"Flight {flight.FlightNumber} has an expected time that is in the past. Not valid.");
+            continue; // skip this flight 
+               
+        }
+
+        // check if the airline code exists in the terminal's airline dict
         if (terminal.Airlines.ContainsKey(airlineCode))
         {
+            // retrieve airline name from the airlines dict
             airlineName = terminal.Airlines[airlineCode].Name;
             Console.WriteLine("{0, -15} {1, -25} {2, -20} {3, -20} {4}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower());
         }
@@ -267,9 +282,7 @@ void AssignBoardingGate(Terminal terminal)
         return;  // exit if the gate does not exist
     }
 
-    //if (!boardingGates.ContainsKey(gateName))
-
-
+    // get the selected flight from the terminal flight dict
     Flight selectedFlight = terminal.Flights[flightNo];
 
     // display flight information
@@ -282,6 +295,14 @@ void AssignBoardingGate(Terminal terminal)
     Console.WriteLine("Supports DDJB: {0}", gate.SupportsDDJB);
     Console.WriteLine("Supports CFFT: {0}", gate.SupportsCFFT);
     Console.WriteLine("Supports LWTT: {0}", gate.SupportsLWTT);
+
+    // check if the flight is assigned to a boarding gate or not
+    if (gate.AssignedFlight != null)
+    {
+        Console.WriteLine($"Boarding Gate {gateName} is assigned to another flight: {gate.AssignedFlight.FlightNumber}");
+        Console.WriteLine("Please select another gate");
+        return; // exit if the gate is already assigned to another flight
+    }
 
     // prompt the user to update the flight status
     Console.WriteLine("Would you like to update the status of the flight? (Y/N): ");
@@ -343,11 +364,33 @@ void CreateNewFlight(Terminal terminal)
         Console.Write("Enter Flight Number: ");
         string flightNumber = Console.ReadLine().ToUpper(); // ensure flight number is in upper case
 
+        // ensure input is not empty
+        if (string.IsNullOrEmpty(flightNumber))
+        {
+            Console.WriteLine("Error! The flight number cannot be empty!");
+            continue; // restart the loop if input is invalid
+        }
+
         Console.Write("Enter Origin: ");
         string origin = Console.ReadLine();
 
+        // ensure input is not empty
+        if (string.IsNullOrEmpty(origin))
+        {
+            Console.WriteLine("Error! The origin cannot be empty!");
+            continue; // restart the loop if input is invalid
+        }
+
         Console.Write("Enter Destination: ");
         string destination = Console.ReadLine();
+
+        if (string.IsNullOrEmpty(destination))
+        {
+            // ensure the destination is not empty
+            Console.WriteLine("Error! The destination cannot be empty!");
+            continue; // restart the loop if input is invalid
+        }
+    
 
         DateTime expectedTime = DateTime.MinValue; // Declare expectedTime
         bool validDate = false;
@@ -358,13 +401,13 @@ void CreateNewFlight(Terminal terminal)
             Console.Write("Enter Expected Departure/Arrival Time (dd/MM/yyyy HH:mm): ");
             string date = Console.ReadLine(); // Get the input as a string
 
-            // Use TryParseExact for strict format matching
             if (DateTime.TryParseExact(date, "d/M/yyyy HH:mm", null, System.Globalization.DateTimeStyles.None, out expectedTime))
             {
                 validDate = true; // If successful, exit the loop
             }
             else
             {
+                // ensure the date format is entered correctly
                 Console.WriteLine("Invalid date format. Please try again.");
             }
         }
@@ -373,9 +416,17 @@ void CreateNewFlight(Terminal terminal)
         Console.Write("Enter Special Request Code (CFFT/DDJB/LWTT/None): ");
         string requestCode = Console.ReadLine();
 
+        // ensure the request code is valid
+        if (requestCode != "CFFT" && requestCode != "DDJB" && requestCode != "LWTT" && requestCode != "None")
+        {
+            Console.WriteLine("Error! The special request code is invalid. Please enter a valid code (CFFT/DDJB/LWTT/None).");
+            continue; //restart the loop if input is invalid
+        }
+
         Flight newFlight;
         string airlineCode = flightNumber.Substring(0, 2); // Extract first 2 characters
 
+        // new flight objects 
         if (requestCode == "CFFT")
         {
             newFlight = new CFFTFlight(flightNumber, origin, destination, expectedTime, "None", 150);
@@ -483,15 +534,17 @@ void ModifyFlightDetails(Terminal terminal)
 //Feature 9
 void ListFlightsBySchedule(Terminal terminal)
 {
+    // check if there are any flights in the terminal
     if (terminal.Flights.Count == 0)
     {
         Console.WriteLine("No flights to display, the list is empty.");
-        return;
+        return; // exit if no flights are found
     }
 
     // Sort the flights by expected time
     List<Flight> sortedFlights = terminal.Flights.Values.OrderBy(flight => flight.ExpectedTime).ToList();
 
+    // display te header
     Console.WriteLine("=============================================");
     Console.WriteLine("Flight Schedule for Changi Airport Terminal 5");
     Console.WriteLine("=============================================");
@@ -506,6 +559,7 @@ void ListFlightsBySchedule(Terminal terminal)
         string airlineName = "Unassigned";
         string airlineCode = flight.FlightNumber.Substring(0, 2); // Extract first 2 characters
 
+        // check if the airline code exists in the terminal airline dict 
         if (terminal.Airlines.ContainsKey(airlineCode))
         {
             airlineName = terminal.Airlines[airlineCode].Name;

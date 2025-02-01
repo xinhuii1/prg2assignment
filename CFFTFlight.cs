@@ -21,7 +21,12 @@ namespace prg2assignment
         public double RequestFee
         {
             get { return requestFee; }
-            set { requestFee = value; }
+            set  // Validation to ensure requestFee is a positive number
+            {
+                if (value < 0)
+                    throw new ArgumentException("Request fee cannot be negative.");
+                requestFee = value;
+            }
         }
 
         // parameterized constructor
