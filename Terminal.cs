@@ -9,50 +9,48 @@ namespace prg2assignment
     class Terminal
     {
         public string TerminalName { get; set; } 
-        private Dictionary<string, Airline> airlines;
-        private Dictionary<string, Flight> flights;
         private Dictionary<string, BoardingGate> boardingGates;
         private Dictionary<string, double> gateFees;
+
+        public Dictionary<string, Airline> Airlines { get; set; }
+
+        public Dictionary<string, Flight> Flights { get; set; }
+        public Dictionary<string, BoardingGate> BoardingGates { get; set; }
+
 
         public Terminal(string terminalName)
         {
             TerminalName = terminalName; 
-            airlines = new Dictionary<string, Airline>();
-            flights = new Dictionary<string, Flight>();
-            boardingGates = new Dictionary<string, BoardingGate>();
+            Airlines = new Dictionary<string, Airline>();
+            Flights = new Dictionary<string, Flight>();
+            BoardingGates = new Dictionary<string, BoardingGate>();
             gateFees = new Dictionary<string, double>();
         }
 
-        public Dictionary<string, BoardingGate> BoardingGates
-        {
-            get { return boardingGates; }
-        }
 
-        public bool AddAirline(Airline airline)                  // check whether the code existed, if no add to airlines dict
+        public bool AddAirline(Airline airline)
         {
-            if (airlines.ContainsKey(airline.Code)) 
+            if (!Airlines.ContainsKey(airline.Code))
             {
-                airlines.Add(airline.Code, airline); 
+                Airlines.Add(airline.Code, airline);
                 return true;
             }
-
-            return false; 
+            return false;
         }
 
-        public bool AddBoardingGate(BoardingGate gate)           // check whether the gate existed, if no add to boardingGate dict
+        public bool AddBoardingGate(BoardingGate gate)
         {
-            if (boardingGates.ContainsKey(gate.GateName) == false)
-            { 
-                boardingGates.Add(gate.GateName, gate);
-                return true; 
+            if (!BoardingGates.ContainsKey(gate.GateName))
+            {
+                BoardingGates.Add(gate.GateName, gate);
+                return true;
             }
-
             return false;
         }
 
         public Airline GetAirlineFromFlight(string flightNumber)
         {
-            foreach (var airline in airlines.Values)               // Loop through all airlines, values represent different airlines
+            foreach (var airline in Airlines.Values)               // Loop through all airlines, values represent different airlines
             {
                 if (airline.Flights.ContainsKey(flightNumber)) // Check if the flight number exists in the airline'sdict
                 {
@@ -65,7 +63,7 @@ namespace prg2assignment
 
         public void PrintAirlineFees()
         {
-            foreach (var airline in airlines.Values)
+            foreach (var airline in Airlines.Values)
             {
                 Console.WriteLine($"{airline.Name}: ${airline.CalculateFees():F2}");     // Display the fees of each airline
             }
@@ -73,7 +71,7 @@ namespace prg2assignment
 
         public override string ToString()
         {
-            return $"Terminal: {TerminalName}, Airlines: {airlines.Count}, Flights: {flights.Count}, Boarding Gates: {boardingGates.Count}";
+            return $"Terminal: {TerminalName}, Airlines: {Airlines.Count}, Flights: {Flights.Count}, Boarding Gates: {boardingGates.Count}";
         }
 
     }
