@@ -333,14 +333,7 @@ void AssignBoardingGate(Terminal terminal)
 
 }
 
-// 6)	Create a new flight
-// - prompt the user to enter the new Flight, which minimally requires the 4 flight specifications (i.e. Flight Number, Origin, Destination, and Expected Departure/Arrival Time)
-// - prompt the user if they would like to enter any additional information, like the Special Request Code
-// - create the proper Flight object with the information given
-// - add the Flight object to the Dictionary
-// - append the new Flight information to the flights.csv file
-// - prompt the user asking if they would like to add another Flight, repeating the previous 5 steps if [Y] or continuing to the next step if [N]
-// - display a message to indicate that the Flight(s) have been successfully added
+//Feature 6
 
 void CreateNewFlight(Terminal terminal)
 {
@@ -487,12 +480,65 @@ void ModifyFlightDetails(Terminal terminal)
 
 }
 
-// 9) Display scheduled flights in chronological order, with boarding gates assignments where applicable
-// display all flights for the day ordered by earliest first
-// ensure your flights implement the IComparable<T> interface
-// for each flight, ensure that:
-// all Flight details are displayed with Basic Information of all Flights, which are all of the flight specifications(i.e.Flight Number, Airline Name, Origin, Destination, and Expected Departure / Arrival Time, Status, Special Request Code(if any) and Boarding Gate(if any))
+//Feature 9
+void ListFlightsBySchedule(Terminal terminal)
+{
+    if (terminal.Flights.Count == 0)
+    {
+        Console.WriteLine("No flights to display, the list is empty.");
+        return;
+    }
 
+    // Sort the flights by expected time
+    List<Flight> sortedFlights = terminal.Flights.Values.OrderBy(flight => flight.ExpectedTime).ToList();
+
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Flight Schedule for Changi Airport Terminal 5");
+    Console.WriteLine("=============================================");
+    Console.WriteLine("{0,-15} {1,-25} {2,-20} {3,-20} {4, -20}",
+        "Flight Number", "Airline Name", "Origin", "Destination",
+        "Expected");
+    Console.WriteLine("{0, -26} {1, -18} {2, -15}", "Departure/Arrival Time", "Status", "Boarding Gate");
+
+    foreach (Flight flight in sortedFlights)
+    {
+        // Default airline name if not found
+        string airlineName = "Unassigned";
+        string airlineCode = flight.FlightNumber.Substring(0, 2); // Extract first 2 characters
+
+        if (terminal.Airlines.ContainsKey(airlineCode))
+        {
+            airlineName = terminal.Airlines[airlineCode].Name;
+        }
+
+        // Check for assigned gate
+        string gateData = "Unassigned";
+        foreach (BoardingGate gate in terminal.BoardingGates.Values)
+        {
+            if (gate.AssignedFlight == flight)
+            {
+                gateData = gate.GateName;
+                break;
+            }
+        }
+
+        // Display the flight information
+        Console.WriteLine("{0,-15} {1,-25} {2,-20} {3,-20} {4,-20} {5,-15}",
+            flight.FlightNumber,
+            airlineName == "Unassigned" ? "Unassigned" : airlineName,
+            flight.Origin,
+            flight.Destination,
+            flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower(),
+            gateData == "Unassigned" ? "Unassigned" : gateData);
+
+        // If the flight's airline is unassigned, print another row with scheduled status
+        if (airlineName == "Unassigned")
+        {
+            Console.WriteLine("{0,-15} {1,-25} {2,-20} {3,-20} {4,-20} {5,-15}",
+                "", "Scheduled", "", "", "", "");
+        }
+    }
+}
 
 
 // main program starts here
@@ -538,4 +584,18 @@ while (true)
         DisplayAirline(terminal);
     }
 
+    else if (option == 6)
+    {
+
+    }
+
+    else if (option == 7)
+    {
+        ListFlightsBySchedule(terminal);
+    }
+
+    else
+    {
+        Console.WriteLine("Goodbye!");
+    }
 }
