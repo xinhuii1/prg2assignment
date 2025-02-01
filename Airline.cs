@@ -57,7 +57,7 @@ namespace prg2assignment
 
         public override string ToString()
         {
-            return $"{Code} - {Name} ";
+            return $"{Code,-15}{Name,-25}";
 
         }
     }
