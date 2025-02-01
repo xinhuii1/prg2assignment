@@ -56,6 +56,8 @@ namespace prg2assignment
             set { status = value; }
         }
 
+        public string AirlineCode { get; set; }
+
         //parameterized constructor
         public Flight(string flightNumber, string origin, string destination, DateTime expectedTime, string status)
         {
