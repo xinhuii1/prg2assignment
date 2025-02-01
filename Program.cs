@@ -333,7 +333,111 @@ void AssignBoardingGate(Terminal terminal)
 
 }
 
-//Feature 6
+// 6)	Create a new flight
+// - prompt the user to enter the new Flight, which minimally requires the 4 flight specifications (i.e. Flight Number, Origin, Destination, and Expected Departure/Arrival Time)
+// - prompt the user if they would like to enter any additional information, like the Special Request Code
+// - create the proper Flight object with the information given
+// - add the Flight object to the Dictionary
+// - append the new Flight information to the flights.csv file
+// - prompt the user asking if they would like to add another Flight, repeating the previous 5 steps if [Y] or continuing to the next step if [N]
+// - display a message to indicate that the Flight(s) have been successfully added
+
+void CreateNewFlight(Terminal terminal)
+{
+    while (true)
+    {
+        // Gather user input for new flight details
+        Console.Write("Enter Flight Number: ");
+        string flightNumber = Console.ReadLine().ToUpper(); // ensure flight number is in upper case
+
+        Console.Write("Enter Origin: ");
+        string origin = Console.ReadLine();
+
+        Console.Write("Enter Destination: ");
+        string destination = Console.ReadLine();
+
+        DateTime expectedTime = DateTime.MinValue; // Declare expectedTime
+        bool validDate = false;
+
+        // Ensure expectedTime is correctly assigned
+        while (!validDate)
+        {
+            Console.Write("Enter Expected Departure/Arrival Time (dd/MM/yyyy HH:mm): ");
+            string date = Console.ReadLine(); // Get the input as a string
+
+            // Use TryParseExact for strict format matching
+            if (DateTime.TryParseExact(date, "d/M/yyyy HH:mm", null, System.Globalization.DateTimeStyles.None, out expectedTime))
+            {
+                validDate = true; // If successful, exit the loop
+            }
+            else
+            {
+                Console.WriteLine("Invalid date format. Please try again.");
+            }
+        }
+
+        // Ask user for the special request code
+        Console.Write("Enter Special Request Code (CFFT/DDJB/LWTT/None): ");
+        string requestCode = Console.ReadLine();
+
+        Flight newFlight;
+        string airlineCode = flightNumber.Substring(0, 2); // Extract first 2 characters
+
+        if (requestCode == "CFFT")
+        {
+            newFlight = new CFFTFlight(flightNumber, origin, destination, expectedTime, "None", 150);
+        }
+        else if (requestCode == "LWTT")
+        {
+            newFlight = new LWTTFlight(flightNumber, origin, destination, expectedTime, "None", 500);
+        }
+        else if (requestCode == "DDJB")
+        {
+            newFlight = new DDJBFlight(flightNumber, origin, destination, expectedTime, "None", 250);
+        }
+        else
+        {
+            newFlight = new NORMFlight(flightNumber, origin, destination, expectedTime, "None");
+        }
+
+        newFlight.AirlineCode = airlineCode; // Set the airline code for the flight
+
+        // Add the new flight object to the Terminal's Flights dictionary
+        terminal.Flights.Add(flightNumber, newFlight);
+        Console.WriteLine($"Flight {flightNumber} has been successfully added to the terminal.");
+
+        // Append the new flight details to the flights.csv file
+        AppendFlight(flightNumber, origin, destination, expectedTime, requestCode);
+
+        // Ask the user if they want to add another flight
+        Console.WriteLine("Would you like to add another flight? (Y/N): ");
+        string choice = Console.ReadLine().ToUpper();  // Ensure input is in upper case
+
+        if (choice == "N")
+        {
+            break;  // Exit the loop if the user does not want to add another flight
+        }
+    }
+}
+
+void AppendFlight(string flightNumber, string origin, string destination, DateTime expectedTime, string requestCode)
+{
+    try
+    {
+        using (StreamWriter sw = new StreamWriter("flights.csv", append: true))
+        {
+            // Formatting the DateTime correctly before writing to the file
+            string newFlight = $"{flightNumber}, {origin}, {destination}, {expectedTime:dd/MM/yyyy HH:mm}, {requestCode}";
+            sw.WriteLine(newFlight);
+            Console.WriteLine($"Flight {flightNumber} has been added to flights.csv");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error, unable to append to flights.csv: {ex.Message}");
+    }
+}
+
 //Feature 7
 void DisplayAirline(Terminal terminal)
 {
@@ -383,6 +487,14 @@ void ModifyFlightDetails(Terminal terminal)
 
 }
 
+// 9) Display scheduled flights in chronological order, with boarding gates assignments where applicable
+// display all flights for the day ordered by earliest first
+// ensure your flights implement the IComparable<T> interface
+// for each flight, ensure that:
+// all Flight details are displayed with Basic Information of all Flights, which are all of the flight specifications(i.e.Flight Number, Airline Name, Origin, Destination, and Expected Departure / Arrival Time, Status, Special Request Code(if any) and Boarding Gate(if any))
+
+
+
 // main program starts here
 Terminal terminal = new Terminal("Changi Airport Terminal 5");
 LoadAirlines(terminal);  // load airline method
@@ -418,7 +530,7 @@ while (true)
 
     else if (option == 4)
     {
-        // Call this when user selects option 2 (List Boarding Gates)
+        CreateNewFlight(terminal);
     }
 
     else if (option == 5)
