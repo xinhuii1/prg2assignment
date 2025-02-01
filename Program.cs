@@ -26,115 +26,87 @@ void DisplayMenu()
     Console.WriteLine(); // leave a new line
 }
 
-// Basic feature 1) Load files (airlines and boarding gates)
-// - load the airlines.csv file
-// - create the Airline objects based on the data loaded
-// - add the Airlines objects into an Airline Dictionary
-// - load the boardinggates.csv file
-// - create the Boarding Gate objects based on the data loaded
-// - add the Boarding Gate objects into a Boarding Gate dictionary
-
-Dictionary<string, Airline> airlines = new Dictionary<string, Airline>();
-void LoadAirlines(Terminal terminal)
-{
-    if (!File.Exists("airlines.csv"))
-    {
-        Console.WriteLine("Error: airlines.csv file is missing!");
-        return;
-    }
-
-    string[] csvLines = File.ReadAllLines("airlines.csv");
-
-    for (int i = 1; i < csvLines.Length; i++) // Skip header
-    {
-        string[] data = csvLines[i].Split(',');
-
-        if (data.Length != 2) // Ensure correct column count
-        {
-            Console.WriteLine($"Error: Invalid data on line {i + 1}: {csvLines[i]}");
-            continue;
-        }
-
-        string name = data[0].Trim();
-        string code = data[1].Trim();
-
-        Airline newAirline = new Airline(name, code);
-
-        // Call AddAirline method from Terminal class
-        if (!terminal.AddAirline(newAirline))
-        {
-            Console.WriteLine($"Failed to add airline {name} with code {code}");
-            Console.WriteLine($"Error: Airline code {code} already exists.");
-        }
-        else
-        {
-            Console.WriteLine($"Sucessessfully added airline {name} with code {code}");
-        }
-    }
-
-    // Print the total airlines loaded
-    Console.WriteLine($"Loaded {csvLines.Length - 1} airlines.");
-    foreach (var airline in terminal.Airlines)
-    {
-        Console.WriteLine($"Airline Code: {airline.Key}, Name: {airline.Value.Name}");
-    }
-}
-
-
-Dictionary<string, BoardingGate> boardingGates = new Dictionary<string, BoardingGate>();
-
+// Feature 1
 void LoadBoardingGates(Terminal terminal)
 {
     if (!File.Exists("boardinggates.csv"))
     {
-        Console.WriteLine("Error: boardinggates.csv file is missing!");
+        Console.WriteLine($"Error: File boardinggates.csv not found.");
         return;
     }
 
-
-    string[] csvLines = File.ReadAllLines("boardinggates.csv");
-
-    for (int i = 1; i < csvLines.Length; i++) // Skip header row
+    string[] lines = File.ReadAllLines("boardinggates.csv");
+    if (lines.Length < 2)                                                                 // Check if file has at least a header and one data row
     {
-        string[] data = csvLines[i].Split(',');
+        Console.WriteLine("Error: No boarding gate data found in the file.");
+        return;
+    }
 
-        if (data.Length != 4) // Ensure exactly 4 columns
+    for (int i = 1; i < lines.Length; i++)                                                // Start from 1 to skip header
+    {
+        string[] parts = lines[i].Split(',');
+
+        if (parts.Length != 4)                                                            // Ensure the row has exactly 4 columns
         {
-            Console.WriteLine($"Error: Invalid data on line {i + 1}: {csvLines[i]}");
-            continue;
-
+            Console.WriteLine($"Error: Invalid data format at line {i + 1}: {lines[i]}");
+            continue; // Skip this row and proceed to the next
         }
 
-        string gateName = data[0].Trim();
-        bool supportsCFFT = Convert.ToBoolean(data[1].Trim());
-        bool supportsDDJB = Convert.ToBoolean(data[2].Trim());
-        bool supportsLWTT = Convert.ToBoolean(data[3].Trim());
-
-        BoardingGate newGate = new BoardingGate(gateName, supportsCFFT, supportsDDJB, supportsLWTT);
-
-        // Call AddBoardingGate from Terminal and check for duplicates
-        if (!terminal.AddBoardingGate(newGate))
+        try
         {
-            Console.WriteLine($"Error: Boarding Gate {gateName} already exists in the dictionary.");
+            string gateName = parts[0].Trim();
+            bool supportsCFFT = Convert.ToBoolean(parts[1].Trim());
+            bool supportsDDJB = Convert.ToBoolean(parts[2].Trim());
+            bool supportsLWTT = Convert.ToBoolean(parts[3].Trim());
+
+            BoardingGate gate = new BoardingGate(gateName, supportsCFFT, supportsDDJB, supportsLWTT);
+
+            if (terminal.AddBoardingGate(gate))
+            {
+                Console.WriteLine($"Error: Boarding Gate {gateName} already exists. Skipping duplicate entry.");
+            }
         }
-
-        else
+        catch (FormatException)
         {
-            Console.WriteLine($"Successfully added boarding gate {gateName}");
+            Console.WriteLine($"Error: Invalid boolean values at line {i + 1}: {lines[i]}");
         }
     }
 }
 
-// basic feature 2)	Load files (flights)
-// - load the flights.csv file
-// - create the Flight objects based on the data loaded
-// - add the Flight objects into a Dictionary
 
+void LoadAirlines(Terminal terminal)
+{
+    if (!File.Exists("airlines.csv"))
+    {
+        Console.WriteLine($"File not found: airlines.csv");
+        return;
+    }
 
-// dictionary to store flight objects
-Dictionary<string, Flight> flights = new Dictionary<string, Flight>();
+    string[] lines = File.ReadAllLines("airlines.csv");
+    foreach (string line in lines.Skip(1))
+    {
+        string[] parts = line.Split(',');
 
-// method to load the flight.csv flight
+        if (parts.Length >= 2)
+        {
+            string airlineName = parts[0].Trim();
+            string airlineCode = parts[1].Trim();
+
+            Airline airline = new Airline(airlineName, airlineCode);
+
+            if (!terminal.AddAirline(airline))
+            {
+                Console.WriteLine($"Error: Airline {airlineCode} already exists. Skipping duplicate entry.");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Invalid line format: {line}");
+        }
+    }
+}
+
+// Feature 2
 void LoadFlights(Terminal terminal)
 {
     if (!File.Exists("flights.csv"))
@@ -199,6 +171,7 @@ void LoadFlights(Terminal terminal)
 
             flight.AirlineCode = airlineCode;
             terminal.Flights.Add(flightNumber, flight);
+
             Console.WriteLine($"Added flight {flightNumber} ({origin} → {destination})");
         }
     }
@@ -207,10 +180,7 @@ void LoadFlights(Terminal terminal)
 
 
 
-// basic feature 3)	List all flights with their basic information
-// - display the Basic Information of all Flights, which are the 5 flight specifications (i.e. Flight Number, Airline Name, Origin, Destination, and Expected Departure/Arrival Time)
-
-// method to display all the flights information
+//Feature 3
 void ListAllFlights(Terminal terminal)
 {
     if (terminal.Flights.Count == 0)
@@ -238,16 +208,25 @@ void ListAllFlights(Terminal terminal)
     }
 }
 
+//Feature 4
+void DisplayAllBoardingGates(Terminal terminal)
+{
+    Console.WriteLine("======================================================");
+    Console.WriteLine("List of Boarding Gates for Changi Airport Terminal 5");
+    Console.WriteLine("======================================================");
 
-// 5)	Assign a boarding gate to a flight
-// - prompt the user for the Flight Number
-// - display the basic information of the selected Flight, including the Special Request Code (if any)
-// - prompt the user for the Boarding Gate
-// - check that the selected Boarding Gate is not assigned to another Flight (Note: For Basic Features, there is no need to validate if the Special Request Codes between Flights and Boarding Gates match)
-//  - if the Boarding Gate selected is already assigned to another flight, display a message that the Boarding Gate is already assigned and repeat the previous step
-// - display the basic information of the selected Flight, Special Request Code (if any), and Boarding Gate entered
-// - prompt the user if they would like to update the Status of the Flight, with a new Status of any of the following options: “Delayed”, “Boarding”, or “On Time” [Y] or set the Status of the Flight to the default of “On Time” and continue to the next step if [N]
-// - dsplay a message to indicate a successful Boarding Gate assignment
+    // Table Header using \t for spacing
+    Console.WriteLine("{0,-12}{1,-10}{2,-10}{3,-10}", "Gate Name", "DDJB", "CFFT", "LWTT");
+    Console.WriteLine("------------------------------------------------------");
+
+    // Iterate through all boarding gates and print using ToString()
+    foreach (var gate in terminal.BoardingGates.Values)
+    {
+        Console.WriteLine(gate.ToString()); // ✅ Uses ToString() from BoardingGate.cs
+    }
+}
+
+// Feature5
 
 void AssignBoardingGate(Terminal terminal)
 {
@@ -352,6 +331,23 @@ void AssignBoardingGate(Terminal terminal)
     
 }
 
+//Feature 6
+//Feature 7
+void DisplayFullFlightDetails(Terminal terminal)
+{
+    Console.WriteLine("=============================================");
+    Console.WriteLine("List of Airlines for Changi Airport Terminal 5");
+    Console.WriteLine("=============================================");
+
+    // ✅ Print Table Header (Ensure it matches `ToString()` formatting)
+    Console.WriteLine("{0,-15}{1,-25}", "Airline Code", "Airline Name");
+
+    // ✅ Iterate over Airlines and use ToString()
+    foreach (var airline in terminal.Airlines.Values)
+    {
+        Console.WriteLine(airline.ToString()); // ✅ Uses `ToString()` from Airline.cs
+    }
+}
 
 
 // main program starts here
@@ -359,6 +355,8 @@ Terminal terminal = new Terminal("Changi Airport Terminal 5");
 LoadAirlines(terminal);  // load airline method
 LoadFlights(terminal); // pass airline to loadflight method
 LoadBoardingGates(terminal);    // load boarding gate method
+LoadBoardingGates(terminal);
+
 
 
 while (true)
@@ -375,7 +373,10 @@ while (true)
         ListAllFlights(terminal);
         Console.WriteLine(); //leave a new line
     }
-
+    else if (option == 2)
+    {
+        DisplayAllBoardingGates(terminal);
+    }
     else if (option == 3)
     {
         AssignBoardingGate(terminal);
