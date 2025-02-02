@@ -30,6 +30,8 @@ void DisplayMenu()
     Console.WriteLine("5. Display Airline Flights");
     Console.WriteLine("6. Modify Flight Details");
     Console.WriteLine("7. Display Flight Schedule");
+    Console.WriteLine("8. AutoAssignBoardingGates");
+    Console.WriteLine("9. CalculateTotalFeesPerAirline");
     Console.WriteLine("0. Exit");
     Console.WriteLine(); // leave a new line
 }
@@ -867,7 +869,7 @@ void DisplayFlightBySchedule(Terminal terminal)
     }
 }
 
-// advance feature (a)
+// advance feature (a) Xin Hui
 void ProcessUnassignedFlights(Terminal terminal)
 {
     Queue<Flight> unassignedFlights = new Queue<Flight>();
@@ -983,66 +985,125 @@ void ProcessUnassignedFlights(Terminal terminal)
     Console.WriteLine($"Processed automatically: {processedPercentage:F2}%");
 }
 
-
-// main program starts here
-Terminal terminal = new Terminal("Changi Airport Terminal 5");
-LoadAirlines(terminal);  // load airline method
-LoadBoardingGates(terminal);
-LoadFlights(terminal); // pass airline to loadflight method
-                       // load boarding gate method
-
-
-
-
-while (true)
+// Advanced feature (b) Belle
+void DisplayTotalFeePerAirline(Terminal terminal)
 {
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Total Fee Per Airline for the Day");
+    Console.WriteLine("=============================================");
 
-    DisplayMenu();
+    double totalSubtotalFees = 0;
+    double totalSubtotalDiscounts = 0;
 
-    // get user input for option
-    Console.WriteLine("Please select your option:");
-    int option = Convert.ToInt32(Console.ReadLine());
+    foreach (Airline airline in terminal.Airlines.Values)
+    {
+        double subtotalFees = airline.CalculateFees(); // Use method from Airline.cs
+        double subtotalDiscounts = subtotalFees * 0.10; // Apply 10% discount
 
-    if (option == 1)
-    {
-        ListAllFlights(terminal);
-    }
-    else if (option == 2)
-    {
-        DisplayAllBoardingGates(terminal);
-    }
-    else if (option == 3)
-    {
-        AssignBoardingGate(terminal);
-    }
+        Console.WriteLine(); // Extra line for spacing before each airline
+        Console.WriteLine($"Airline: {airline.Name}");
+        Console.WriteLine("----------------------------------------------------");
+        Console.WriteLine($"Subtotal Fees: ${subtotalFees}");
+        Console.WriteLine($"Subtotal Discounts: -${subtotalDiscounts}");
+        Console.WriteLine($"Final Fees for {airline.Name}: ${subtotalFees - subtotalDiscounts}");
+        Console.WriteLine("----------------------------------------------------");
+        Console.WriteLine(); // Extra line after each airline for better spacing
 
-    else if (option == 4)
-    {
-        CreateNewFlight(terminal);
-    }
-
-    else if (option == 5)
-    {
-        DisplayAirline(terminal);
+        totalSubtotalFees += subtotalFees;
+        totalSubtotalDiscounts += subtotalDiscounts;
     }
 
-    else if (option == 6)
-    {
-        ModifyFlightDetails(terminal);
-    }
+    // Display overall totals
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Overall Totals for the Day");
+    Console.WriteLine("=============================================");
+    Console.WriteLine($"Total Subtotal Fees: ${totalSubtotalFees}");
+    Console.WriteLine($"Total Subtotal Discounts: -${totalSubtotalDiscounts}");
+    Console.WriteLine($"Final Total Fees Terminal 5 Will Collect: ${totalSubtotalFees - totalSubtotalDiscounts}");
 
-    else if (option == 7)
+    double finalTotalFees = totalSubtotalFees - totalSubtotalDiscounts;
+    if (finalTotalFees > 0)
     {
-        DisplayFlightBySchedule(terminal);
-    }
-
-    else if (option == 8)
-    {
-        
+        Console.WriteLine($"Percentage of Discounts: {(totalSubtotalDiscounts / finalTotalFees) * 100:F2}%");
     }
     else
     {
-        Console.WriteLine("Goodbye!");
-        break;
+        Console.WriteLine("No fees collected today.");
+    }
+}
+
+
+
+
+// main program starts here
+Terminal terminal = new Terminal("Changi Airport Terminal 5");
+LoadAirlines(terminal);  
+LoadBoardingGates(terminal);
+LoadFlights(terminal);
+
+while (true)
+{
+    try
+    {
+        DisplayMenu();
+
+        Console.WriteLine("Please select your option:");
+        string input = Console.ReadLine();
+
+        if (!int.TryParse(input, out int option))
+        {
+            Console.WriteLine("Invalid input! Please enter a number between 1 and 9 or 0 to exit.");
+            continue;
+        }
+
+        if (option == 1)
+        {
+            ListAllFlights(terminal);
+        }
+        else if (option == 2)
+        {
+            DisplayAllBoardingGates(terminal);
+        }
+        else if (option == 3)
+        {
+            AssignBoardingGate(terminal);
+        }
+        else if (option == 4)
+        {
+            CreateNewFlight(terminal);
+        }
+        else if (option == 5)
+        {
+            DisplayAirline(terminal);
+        }
+        else if (option == 6)
+        {
+            ModifyFlightDetails(terminal);
+        }
+        else if (option == 7)
+        {
+            DisplayFlightBySchedule(terminal);
+        }
+        else if (option == 8)
+        {
+            ProcessUnassignedFlights(terminal);
+        }
+        else if (option == 9)
+        {
+            DisplayTotalFeePerAirline(terminal);
+        }
+        else if (option == 0)
+        {
+            Console.WriteLine("Goodbye!");
+            break;
+        }
+        else
+        {
+            Console.WriteLine("Invalid option! Please enter a number between 1 and 9 or 0 to exit.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An error occurred: {ex.Message}. Please try again.");
     }
 }
