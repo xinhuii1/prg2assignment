@@ -454,7 +454,7 @@ void CreateNewFlight(Terminal terminal)
 
             if (DateTime.TryParseExact(date, "d/M/yyyy HH:mm", null, System.Globalization.DateTimeStyles.None, out expectedTime))
             {
-                validDate = true; // If successful, exit the loop
+                validDate = true;           // If successful, exit the loop
             }
             else
             {
@@ -471,7 +471,7 @@ void CreateNewFlight(Terminal terminal)
         if (requestCode != "CFFT" && requestCode != "DDJB" && requestCode != "LWTT" && requestCode != "None")
         {
             Console.WriteLine("Error! The special request code is invalid. Please enter a valid code (CFFT/DDJB/LWTT/None).");
-            continue; //restart the loop if input is invalid
+            continue;                       //restart the loop if input is invalid
         }
 
         Flight newFlight;
@@ -538,16 +538,16 @@ void AppendFlight(string flightNumber, string origin, string destination, DateTi
 {
     try
     {
+        // append new flight to flight csv
         using (StreamWriter sw = new StreamWriter("flights.csv", append: true))
         {
-            // Formatting the DateTime correctly before writing to the file
             string newFlight = $"{flightNumber}, {origin}, {destination}, {expectedTime:dd/MM/yyyy HH:mm}, {requestCode}";
             sw.WriteLine(newFlight);
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error, unable to append to flights.csv: {ex.Message}");
+        Console.WriteLine($"Error! Unable to append to flights.csv: {ex.Message}");
     }
 }
 
