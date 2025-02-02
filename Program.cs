@@ -829,6 +829,81 @@ void ProcessUnassignedFlights(Terminal terminal)
     Console.WriteLine($"Total unassigned boarding gates: {unassignedGateCount}");
 
     int assignedFlights = 0;
+
+    while (unassignedFlights.Count > 0)
+    {
+        Flight flight = unassignedFlights.Dequeue();
+        BoardingGate assignedGate = null;
+
+        if (flight is CFFTFlight)
+        {
+            foreach (BoardingGate gate in availableGates)
+                if (gate.SupportsCFFT && gate.AssignedFlight == null)
+                {
+                    assignedGate = gate;
+                    break;
+                }
+        }
+        else if (flight is DDJBFlight)
+        {
+            foreach (BoardingGate gate in availableGates)
+            {
+                if (gate.SupportsDDJB && gate.AssignedFlight == null)
+                {
+                    assignedGate = gate;
+                    break;
+                }
+            }
+        }
+
+        else if (flight is LWTTFlight)
+        {
+            foreach (BoardingGate gate in availableGates)
+            {
+                if (gate.SupportsLWTT && gate.AssignedFlight == null)
+                {
+                    assignedGate = gate;
+                    break;
+                }
+            }
+        }
+        
+        else
+        {
+            foreach (BoardingGate gate in availableGates)
+            {
+                if (!gate.SupportsLWTT && !gate.SupportsCFFT && !gate.SupportsDDJB && gate.AssignedFlight == null)
+                {
+                    assignedGate = gate;
+                    break;
+                }
+            }
+        }
+
+        if (assignedGate != null)
+        {
+            assignedGate.AssignedFlight = flight;
+            availableGates.Remove(assignedGate);
+            assignedFlights++;
+
+            Console.WriteLine("===============================================");
+            Console.WriteLine("Flight Assigned:");
+            Console.WriteLine($"Flight Number: {flight.FlightNumber}");
+            Console.WriteLine($"Airline Name: {terminal.Airlines[flight.FlightNumber.Substring(0, 2)].Name}");
+            Console.WriteLine($"Origin: {flight.Origin}");
+            Console.WriteLine($"Destination: {flight.Destination}");
+            Console.WriteLine($"Expected Departure/Arrival Time: {flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower()}");
+            Console.WriteLine($"Special Request Code: {flight.GetType().Name.Replace("Flight", "")}");
+            Console.WriteLine($"Assigned Boarding Gate: {assignedGate.GateName}");
+            Console.WriteLine("===============================================");
+        }
+    }
+
+    Console.WriteLine($"Total flights assigned automatically: {assignedFlights}");
+    Console.WriteLine($"Total boarding gates assigned automatically: {assignedFlights}");
+
+    double processedPercentage = (double)assignedFlights / Math.Max(1, unassignedFlightCount) * 100;
+    Console.WriteLine($"Processed automatically: {processedPercentage:F2}%");
 }
 
 
