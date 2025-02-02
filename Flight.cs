@@ -54,8 +54,7 @@ namespace prg2assignment
                 // validate that origin is not empty
                 if (string.IsNullOrEmpty(value))
                     throw new ArgumentNullException("Destination cannot be empty.");
-
-
+                destination = value;
             }
         }
 

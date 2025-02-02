@@ -14,6 +14,12 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 // method to display menu
 void DisplayMenu()
 {
+    Console.WriteLine();
+    Console.WriteLine();
+    Console.WriteLine();
+    Console.WriteLine();
+    Console.WriteLine(); // leave a new line
+
     Console.WriteLine("=============================================");
     Console.WriteLine("Welcome to Changi Airport Terminal 5");
     Console.WriteLine("=============================================");
@@ -117,6 +123,8 @@ void LoadAirlines(Terminal terminal)
 void LoadFlights(Terminal terminal)
 {
     Console.WriteLine("Loading Flights...");
+
+    // check if the flights.csv file exists
     if (!File.Exists("flights.csv"))
     {
         Console.WriteLine("Error: flights.csv file is missing!");
@@ -129,11 +137,30 @@ void LoadFlights(Terminal terminal)
     {
         string[] data = csvLines[i].Split(',');
 
+        // check that the row has at least 4 elements
         if (data.Length >= 4)
         {
             string flightNumber = data[0];
             string origin = data[1];
             string destination = data[2];
+
+            // Validate that flight number, origin, and destination are not empty
+            if (string.IsNullOrEmpty(flightNumber))
+            {
+                Console.WriteLine($"Error! Flight number is missing at line {i + 1}. Skipping this flight.");
+                continue;  
+            }
+            if (string.IsNullOrEmpty(origin))
+            {
+                Console.WriteLine($"Error! Origin is missing for flight {flightNumber} at line {i + 1}. Skipping this flight.");
+                continue;
+            }
+            if (string.IsNullOrEmpty(destination))
+            {
+                Console.WriteLine($"Error! Missing destination for flight {flightNumber} at line {i + 1}. Assigning 'Unknown Destination'.");
+                destination = "Unknown Destination";  // Set a default value for destination if missing
+            }
+
 
             DateTime expectedTime;
 
@@ -141,15 +168,14 @@ void LoadFlights(Terminal terminal)
             {
                 expectedTime = DateTime.Parse(data[3]);
             }
+
             catch
             {
-                Console.WriteLine($"Invalid time format for this flight number: {flightNumber}");
                 continue;
             }
 
             string specialRequestCode = data[4];
             string airlineCode = flightNumber.Substring(0, 2);               // Get the airline code from the flight number
-
 
             if (!terminal.Airlines.ContainsKey(airlineCode))                 // Check if airline code exists in the airlines dictionary
             {
@@ -166,15 +192,15 @@ void LoadFlights(Terminal terminal)
             }
             else if (specialRequestCode == "LWTT")
             {
-                flight = new LWTTFlight(flightNumber, origin, destination, expectedTime, "None", 500);
+                flight = new LWTTFlight(flightNumber, origin, destination, expectedTime, "Scheduled", 500);
             }
             else if (specialRequestCode == "DDJB")
             {
-                flight = new DDJBFlight(flightNumber, origin, destination, expectedTime, "None", 250);
+                flight = new DDJBFlight(flightNumber, origin, destination, expectedTime, "Scheduled", 250);
             }
             else
             {
-                flight = new NORMFlight(flightNumber, origin, destination, expectedTime, "None");
+                flight = new NORMFlight(flightNumber, origin, destination, expectedTime, "Scheduled");
             }
 
             flight.AirlineCode = airlineCode;
@@ -183,13 +209,16 @@ void LoadFlights(Terminal terminal)
 
             if (!addFlight)
             {
-                Console.WriteLine($"Error: Flight {flightNumber} already exists for {airline.Name}. Skipping duplicate entry.");
+                // check if flight already exists for this airline, if it exist skip adding in it
+                Console.WriteLine($"Error! Flight {flightNumber} already exists for {airline.Name}. Skipping duplicate entry.");
             }
 
         }
     }
+
     Console.WriteLine($"{terminal.Flights.Count} Flights Loaded!");
 }
+
 
 
 
@@ -207,26 +236,19 @@ void ListAllFlights(Terminal terminal)
     Console.WriteLine("=============================================");
     Console.WriteLine("List of All Flights");
     Console.WriteLine("=============================================");
-    Console.WriteLine("{0,-15} {1,-25} {2,-20} {3, -20} {4, -20}", "Flight Number", "Airline Name", "Origin", "Destination", "Expected Departure/Arrival Time");
+    Console.WriteLine("{0,-15} {1,-25} {2,-20} {3, -20} {4, -20}", "Flight Number", "Airline Name", "Origin", "Destination", "Expected");
+    Console.WriteLine("{0, -15}", "Departure/Arrival Time");
 
     foreach (Flight flight in terminal.Flights.Values)
     {
         string airlineName = "Not Available";                                       // if airline name is not found, default name to not available
         string airlineCode = flight.FlightNumber.Substring(0, 2);                   // extract the first 2 characters
 
-        if (flight.ExpectedTime < DateTime.Now)
-        {
-            Console.WriteLine($"Flight {flight.FlightNumber} has an expected time that is in the past. Not valid.");
-            continue;                                                               // skip this flight 
-               
-        }
-
         if (terminal.Airlines.ContainsKey(airlineCode))                             // check if the airline code exists in the terminal's airline dict
         {
-            airlineName = terminal.Airlines[airlineCode].Name;                      // retrieve airline name from the airlines dict
+            airlineName = terminal.Airlines[airlineCode].Name;                                                                     // retrieve airline name from the airlines dict
             Console.WriteLine("{0, -15} {1, -25} {2, -20} {3, -20} {4}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower());
         }
-
 
     }
 }
@@ -238,7 +260,6 @@ void DisplayAllBoardingGates(Terminal terminal)
     Console.WriteLine("List of Boarding Gates for Changi Airport Terminal 5");
     Console.WriteLine("======================================================");
     Console.WriteLine("{0,-12}{1,-10}{2,-10}{3,-10}", "Gate Name", "DDJB", "CFFT", "LWTT");
-    Console.WriteLine("------------------------------------------------------");
 
     foreach (var gate in terminal.BoardingGates.Values)
     {
@@ -246,8 +267,7 @@ void DisplayAllBoardingGates(Terminal terminal)
     }
 }
 
-// Feature5
-
+// Feature 5
 void AssignBoardingGate(Terminal terminal)
 {
     Console.WriteLine("=============================================");
@@ -447,7 +467,7 @@ void CreateNewFlight(Terminal terminal)
         if (added)
         {
             terminal.Flights.Add(flightNumber, newFlight);
-            Console.WriteLine($"Flight {flightNumber} has been successfully added.");
+            Console.WriteLine($"Flight {flightNumber} has been added!");
             AppendFlight(flightNumber, origin, destination, expectedTime, requestCode);
         }
         else
@@ -479,7 +499,6 @@ void AppendFlight(string flightNumber, string origin, string destination, DateTi
             // Formatting the DateTime correctly before writing to the file
             string newFlight = $"{flightNumber}, {origin}, {destination}, {expectedTime:dd/MM/yyyy HH:mm}, {requestCode}";
             sw.WriteLine(newFlight);
-            Console.WriteLine($"Flight {flightNumber} has been added to flights.csv");
         }
     }
     catch (Exception ex)
@@ -939,7 +958,6 @@ while (true)
     if (option == 1)
     {
         ListAllFlights(terminal);
-        Console.WriteLine(); //leave a new line
     }
     else if (option == 2)
     {
@@ -948,7 +966,6 @@ while (true)
     else if (option == 3)
     {
         AssignBoardingGate(terminal);
-        Console.WriteLine();  // leave a new line
     }
 
     else if (option == 4)
