@@ -828,7 +828,7 @@ void ModifyFlightDetails(Terminal terminal)
 }
 
 //Feature 9
-void ListFlightsBySchedule(Terminal terminal)
+void DisplayFlightBySchedule(Terminal terminal)
 {
     // check if there are any flights in the terminal
     if (terminal.Flights.Count == 0)
@@ -837,20 +837,20 @@ void ListFlightsBySchedule(Terminal terminal)
         return; // exit if no flights are found
     }
 
-    // Sort the flights by expected time
+    // Sort the flights by expected time (descending)
     List<Flight> sortedFlights = terminal.Flights.Values.OrderBy(flight => flight.ExpectedTime).ToList();
 
     // display te header
     Console.WriteLine("=============================================");
     Console.WriteLine("Flight Schedule for Changi Airport Terminal 5");
     Console.WriteLine("=============================================");
-    Console.WriteLine("{0,-15} {1,-25} {2,-20} {3,-20} {4, -20}",
-        "Flight Number", "Airline Name", "Origin", "Destination",
-        "Expected");
+    Console.WriteLine("{0,-15} {1,-25} {2,-20} {3,-20} {4, -20}", "Flight Number", "Airline Name", "Origin", "Destination", "Expected");
     Console.WriteLine("{0, -26} {1, -18} {2, -15}", "Departure/Arrival Time", "Status", "Boarding Gate");
 
     foreach (Flight flight in sortedFlights)
     {
+        string status = flight.Status;
+
         // Default airline name if not found
         string airlineName = "Unassigned";
         string airlineCode = flight.FlightNumber.Substring(0, 2); // Extract first 2 characters
@@ -858,35 +858,12 @@ void ListFlightsBySchedule(Terminal terminal)
         // check if the airline code exists in the terminal airline dict 
         if (terminal.Airlines.ContainsKey(airlineCode))
         {
-            airlineName = terminal.Airlines[airlineCode].Name;
-        }
-
-        // Check for assigned gate
-        string gateData = "Unassigned";
-        foreach (BoardingGate gate in terminal.BoardingGates.Values)
-        {
-            if (gate.AssignedFlight == flight)
-            {
-                gateData = gate.GateName;
-                break;
-            }
+            airlineName = terminal.Airlines[airlineCode].Name;     // get the airline name
         }
 
         // Display the flight information
-        Console.WriteLine("{0,-15} {1,-25} {2,-20} {3,-20} {4,-20} {5,-15}",
-            flight.FlightNumber,
-            airlineName == "Unassigned" ? "Unassigned" : airlineName,
-            flight.Origin,
-            flight.Destination,
-            flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower(),
-            gateData == "Unassigned" ? "Unassigned" : gateData);
-
-        // If the flight's airline is unassigned, print another row with scheduled status
-        if (airlineName == "Unassigned")
-        {
-            Console.WriteLine("{0,-15} {1,-25} {2,-20} {3,-20} {4,-20} {5,-15}",
-                "", "Scheduled", "", "", "", "");
-        }
+        Console.WriteLine("{0,-15} {1,-25} {2,-20} {3,-20} {4,-20}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower());
+        Console.WriteLine("{0, -15} {1, -15}", status, "Unassigned");
     }
 }
 
@@ -1056,7 +1033,7 @@ while (true)
 
     else if (option == 7)
     {
-        ListFlightsBySchedule(terminal);
+        DisplayFlightBySchedule(terminal);
     }
 
     else if (option == 8)
