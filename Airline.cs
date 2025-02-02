@@ -27,7 +27,6 @@ namespace prg2assignment
                 return false;
             }
             Flights.Add(flight.FlightNumber, flight);                   // Add the flight to dict
-            Console.WriteLine($"Flight {flight.FlightNumber} added to the dictionary.");
             return true;
         }
 
