@@ -148,7 +148,7 @@ void LoadFlights(Terminal terminal)
             if (string.IsNullOrEmpty(flightNumber))
             {
                 Console.WriteLine($"Error! Flight number is missing at line {i + 1}. Skipping this flight.");
-                continue;  
+                continue;
             }
             if (string.IsNullOrEmpty(origin))
             {
@@ -441,7 +441,7 @@ void CreateNewFlight(Terminal terminal)
             Console.WriteLine("Error! The destination cannot be empty!");
             continue; // restart the loop if input is invalid
         }
-    
+
 
         DateTime expectedTime = DateTime.MinValue; // Declare expectedTime
         bool validDate = false;
@@ -702,7 +702,7 @@ void ModifyFlightDetails(Terminal terminal)
                 return;
             }
 
-   
+
             selectedAirline.Flights[selectedFlight.FlightNumber] = updatedFlight;
             terminal.Flights[selectedFlight.FlightNumber] = updatedFlight;
 
@@ -868,13 +868,13 @@ void ProcessUnassignedFlights(Terminal terminal)
 {
     Queue<Flight> unassignedFlights = new Queue<Flight>();
 
-    foreach(Flight flight in terminal.Flights.Values)
+    foreach (Flight flight in terminal.Flights.Values)
     {
         bool isAssigned = false;
-        foreach(BoardingGate gate in terminal.BoardingGates.Values)
+        foreach (BoardingGate gate in terminal.BoardingGates.Values)
         {
             if (gate.AssignedFlight == flight)
-            { 
+            {
                 isAssigned = true;
                 break;
             }
@@ -940,7 +940,7 @@ void ProcessUnassignedFlights(Terminal terminal)
                 }
             }
         }
-        
+
         else
         {
             foreach (BoardingGate gate in availableGates)
@@ -985,7 +985,7 @@ Terminal terminal = new Terminal("Changi Airport Terminal 5");
 LoadAirlines(terminal);  // load airline method
 LoadBoardingGates(terminal);
 LoadFlights(terminal); // pass airline to loadflight method
- // load boarding gate method
+                       // load boarding gate method
 
 
 
