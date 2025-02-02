@@ -31,6 +31,7 @@ void DisplayMenu()
 // Feature 1
 void LoadBoardingGates(Terminal terminal)
 {
+    Console.WriteLine("Loading Boarding Gates...");
     if (!File.Exists("boardinggates.csv"))
     {
         Console.WriteLine($"Error: File boardinggates.csv not found.");
@@ -43,6 +44,7 @@ void LoadBoardingGates(Terminal terminal)
         Console.WriteLine("Error: No boarding gate data found in the file.");
         return;
     }
+
 
     for (int i = 1; i < lines.Length; i++)                                                // Start from 1 to skip header
     {
@@ -63,9 +65,9 @@ void LoadBoardingGates(Terminal terminal)
 
             BoardingGate gate = new BoardingGate(gateName, supportsCFFT, supportsDDJB, supportsLWTT);
 
-            if (terminal.AddBoardingGate(gate))
+            if (terminal.AddBoardingGate(gate))                                           // If it existed in dict already
             {
-                Console.WriteLine($"Error: Boarding Gate {gateName} already exists. Skipping duplicate entry.");
+                continue;
             }
         }
         catch (FormatException)
@@ -73,11 +75,13 @@ void LoadBoardingGates(Terminal terminal)
             Console.WriteLine($"Error: Invalid boolean values at line {i + 1}: {lines[i]}");
         }
     }
+    Console.WriteLine($"{terminal.BoardingGates.Count} Boarding Gates Loaded!");
 }
 
 
 void LoadAirlines(Terminal terminal)
 {
+    Console.WriteLine("Loading Airlines...");
     if (!File.Exists("airlines.csv"))
     {
         Console.WriteLine($"File not found: airlines.csv");
@@ -106,21 +110,22 @@ void LoadAirlines(Terminal terminal)
             Console.WriteLine($"Invalid line format: {line}");
         }
     }
+    Console.WriteLine($"{terminal.Airlines.Count} Airlines Loaded!");
 }
 
 // Feature 2
 void LoadFlights(Terminal terminal)
 {
-    // check if the 'flights.csv' file exists
+    Console.WriteLine("Loading Flights...");
     if (!File.Exists("flights.csv"))
     {
         Console.WriteLine("Error: flights.csv file is missing!");
-        return;  // exit the method if it is not found
+        return;                                                         // exit the method if it is not found
     }
 
     string[] csvLines = File.ReadAllLines("flights.csv");
 
-    for (int i = 1; i < csvLines.Length; i++) // Skip header row
+    for (int i = 1; i < csvLines.Length; i++)                           // Skip header row
     {
         string[] data = csvLines[i].Split(',');
 
@@ -143,21 +148,19 @@ void LoadFlights(Terminal terminal)
             }
 
             string specialRequestCode = data[4];
-            string airlineCode = flightNumber.Substring(0, 2); // Get the airline code from the flight number
+            string airlineCode = flightNumber.Substring(0, 2);               // Get the airline code from the flight number
 
-            // Check if airline code exists in the airlines dictionary
-            if (!terminal.Airlines.ContainsKey(airlineCode))
+
+            if (!terminal.Airlines.ContainsKey(airlineCode))                 // Check if airline code exists in the airlines dictionary
             {
                 Console.WriteLine($"Airline with code {airlineCode} is not found for flight {flightNumber}.");
-                continue; // Skip this flight if airline is not found
+                continue;                                                    // Skip this flight if airline is not found
             }
 
-            // retrieve the airline object from the dictionary
-            Airline airline = terminal.Airlines[airlineCode];
+            Airline airline = terminal.Airlines[airlineCode];                // retrieve the airline object from the dictionary
 
-            // intialization
             Flight flight;
-            if (specialRequestCode == "CFFT")
+            if (specialRequestCode == "CFFT")                                // intialization
             {
                 flight = new CFFTFlight(flightNumber, origin, destination, expectedTime, "Scheduled", 150);
             }
@@ -176,15 +179,16 @@ void LoadFlights(Terminal terminal)
 
             flight.AirlineCode = airlineCode;
             terminal.Flights.Add(flightNumber, flight);
-            bool added = airline.AddFlight(flight);
+            bool addFlight = airline.AddFlight(flight);
 
-            if (!added)
+            if (!addFlight)
             {
                 Console.WriteLine($"Error: Flight {flightNumber} already exists for {airline.Name}. Skipping duplicate entry.");
             }
 
         }
     }
+    Console.WriteLine($"{terminal.Flights.Count} Flights Loaded!");
 }
 
 
@@ -193,11 +197,10 @@ void LoadFlights(Terminal terminal)
 //Feature 3
 void ListAllFlights(Terminal terminal)
 {
-    // check if there are any flights in the terminal
     if (terminal.Flights.Count == 0)
     {
         Console.WriteLine("No flights to display, the list is empty.");
-        return; //exit the method if no flights are available
+        return;                                                                     //exit the method if no flights are available
     }
 
     // display the header
@@ -208,22 +211,19 @@ void ListAllFlights(Terminal terminal)
 
     foreach (Flight flight in terminal.Flights.Values)
     {
-        // if airline name is not found, default name to not available
-        string airlineName = "Not Available";
-        string airlineCode = flight.FlightNumber.Substring(0, 2); // extract the first 2 characters
+        string airlineName = "Not Available";                                       // if airline name is not found, default name to not available
+        string airlineCode = flight.FlightNumber.Substring(0, 2);                   // extract the first 2 characters
 
         if (flight.ExpectedTime < DateTime.Now)
         {
             Console.WriteLine($"Flight {flight.FlightNumber} has an expected time that is in the past. Not valid.");
-            continue; // skip this flight 
+            continue;                                                               // skip this flight 
                
         }
 
-        // check if the airline code exists in the terminal's airline dict
-        if (terminal.Airlines.ContainsKey(airlineCode))
+        if (terminal.Airlines.ContainsKey(airlineCode))                             // check if the airline code exists in the terminal's airline dict
         {
-            // retrieve airline name from the airlines dict
-            airlineName = terminal.Airlines[airlineCode].Name;
+            airlineName = terminal.Airlines[airlineCode].Name;                      // retrieve airline name from the airlines dict
             Console.WriteLine("{0, -15} {1, -25} {2, -20} {3, -20} {4}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower());
         }
 
@@ -237,15 +237,12 @@ void DisplayAllBoardingGates(Terminal terminal)
     Console.WriteLine("======================================================");
     Console.WriteLine("List of Boarding Gates for Changi Airport Terminal 5");
     Console.WriteLine("======================================================");
-
-    // Table Header using \t for spacing
     Console.WriteLine("{0,-12}{1,-10}{2,-10}{3,-10}", "Gate Name", "DDJB", "CFFT", "LWTT");
     Console.WriteLine("------------------------------------------------------");
 
-    // Iterate through all boarding gates and print using ToString()
     foreach (var gate in terminal.BoardingGates.Values)
     {
-        Console.WriteLine(gate.ToString()); // ✅ Uses ToString() from BoardingGate.cs
+        Console.WriteLine(gate.ToString());                                //  Uses ToString() from BoardingGate.cs
     }
 }
 
@@ -253,46 +250,37 @@ void DisplayAllBoardingGates(Terminal terminal)
 
 void AssignBoardingGate(Terminal terminal)
 {
-    // display header
     Console.WriteLine("=============================================");
     Console.WriteLine("Assign a Boarding Gate to a Flight");
     Console.WriteLine("=============================================");
-
-    // prompt user for the flight number
     Console.WriteLine("Enter Flight Number:");
-    string flightNo = Console.ReadLine().ToUpper();  // ensure the flight number is in uppercase
+    string flightNo = Console.ReadLine().ToUpper();                             // ensure the flight number is in uppercase
 
-    // check if the flight number exists in the flights dictionary
-    if (!terminal.Flights.ContainsKey(flightNo))
+    if (!terminal.Flights.ContainsKey(flightNo))                                // check if the flight number exists in the flights dictionary
     {
         Console.WriteLine($"Flight with number {flightNo} is not found.");
-        return; //exit if the flight is not found in the flights dictionary
+        return;                                                                 // exit if the flight is not found in the flights dictionary
     }
 
-    // prompt user for the boarding gate name
     Console.WriteLine("Enter Boarding Gate Name: ");
-    string gateName = Console.ReadLine().Trim().ToUpper();  // ensure the boarding gate is in upper case
+    string gateName = Console.ReadLine().ToUpper();                             // ensure the boarding gate is in upper case
 
-    // initialize
     BoardingGate gate = null;
 
-    // checks if the boarding gate exists in the boarding gate dictionary
-    if (terminal.BoardingGates.ContainsKey(gateName))
+    if (terminal.BoardingGates.ContainsKey(gateName))                           // checks if the boarding gate exists in the boarding gate dictionary
     {
 
-        gate = terminal.BoardingGates[gateName];   //get the boarding gate from dictionary
+        gate = terminal.BoardingGates[gateName];                                // get the boarding gate from dictionary
     }
     else
     {
         Console.WriteLine($"Boarding Gate {gateName} is not found.");
-        return;  // exit if the gate does not exist
+        return;                                                                 // exit if the gate does not exist
     }
 
-    // get the selected flight from the terminal flight dict
-    Flight selectedFlight = terminal.Flights[flightNo];
+    Flight selectedFlight = terminal.Flights[flightNo];                         // get the selected flight from the terminal flight dict
 
-    // display flight information
-    Console.WriteLine($"Flight Number: {selectedFlight.FlightNumber}");
+    Console.WriteLine($"Flight Number: {selectedFlight.FlightNumber}");         // display flight information
     Console.WriteLine($"Origin: {selectedFlight.Origin})");
     Console.WriteLine($"Destination: {selectedFlight.Destination}");
     Console.WriteLine($"Expected Time: {selectedFlight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower()}");
@@ -302,17 +290,15 @@ void AssignBoardingGate(Terminal terminal)
     Console.WriteLine("Supports CFFT: {0}", gate.SupportsCFFT);
     Console.WriteLine("Supports LWTT: {0}", gate.SupportsLWTT);
 
-    // check if the flight is assigned to a boarding gate or not
     if (gate.AssignedFlight != null)
     {
         Console.WriteLine($"Boarding Gate {gateName} is assigned to another flight: {gate.AssignedFlight.FlightNumber}");
         Console.WriteLine("Please select another gate");
-        return; // exit if the gate is already assigned to another flight
+        return; 
     }
 
-    // prompt the user to update the flight status
-    Console.WriteLine("Would you like to update the status of the flight? (Y/N): ");
-    string status = Console.ReadLine().ToUpper(); // ensure status is in uppercase
+    Console.WriteLine("Would you like to update the status of the flight? (Y/N): "); // prompt the user to update the flight status
+    string status = Console.ReadLine().ToUpper(); 
 
     if (status == "Y")
     {
@@ -343,21 +329,16 @@ void AssignBoardingGate(Terminal terminal)
 
         else
         {
-            // if user input is invalid, an error message will be displayed
             Console.WriteLine("Invalid input. Status remains unchanged.");
         }
     }
 
     else
     {
-        // if the user does not want to update, the status is set to on time
         selectedFlight.Status = "On Time";
         Console.WriteLine($"Flight {selectedFlight.FlightNumber} has been assigned to Boarding Gate {gateName}!");
     }
-
-    // associate the boarding gate with the flight
     selectedFlight.Status = $"Assigned to Gate: {gateName}";
-
 }
 
 //Feature 6
@@ -508,33 +489,38 @@ void AppendFlight(string flightNumber, string origin, string destination, DateTi
 }
 
 //Feature 7
-void DisplayAirline(Terminal terminal)
+string DisplayAirline(Terminal terminal)
 {
     Console.WriteLine("=============================================");
     Console.WriteLine("List of Airlines for Changi Airport Terminal 5");
     Console.WriteLine("=============================================");
     Console.WriteLine("{0,-15}{1,-25}", "Airline Code", "Airline Name");
 
-
     foreach (var airline in terminal.Airlines.Values)
     {
-        Console.WriteLine(airline.ToString()); // ✅ Uses `ToString()` from Airline.cs
+        Console.WriteLine(airline.ToString());                           //  Uses `ToString()` from Airline.cs
     }
+
     if (terminal.Flights.Count == 0)
     {
         Console.WriteLine("No flights to display, the list is empty.");
-        return;
+        return null;                                                     // Return null if no flights exist
     }
 
     Console.Write("Enter 2-letter airline code: ");
+    var inputCode = Console.ReadLine()?.ToUpper();
 
-    var inputCode = Console.ReadLine().ToUpper();
+    if (!terminal.Airlines.ContainsKey(inputCode))
+    {
+        Console.WriteLine("Error: Invalid airline code.");
+        return null;                                                    // Return null if the airline code is invalid
+    }
+
     Airline selectedAirline = terminal.Airlines[inputCode];
     Console.WriteLine("=============================================");
     Console.WriteLine($"List of Flights for {selectedAirline.Name}");
     Console.WriteLine("=============================================");
     Console.WriteLine("{0,-15} {1,-25} {2,-20} {3, -20} {4, -20}", "Flight Number", "Airline Name", "Origin", "Destination", "Expected Departure/Arrival Time");
-
 
     foreach (var flight in selectedAirline.Flights.Values)
     {
@@ -542,9 +528,9 @@ void DisplayAirline(Terminal terminal)
         flight.FlightNumber, selectedAirline.Name,
         flight.Origin, flight.Destination,
         flight.ExpectedTime.ToString("dd/MM/yyyy h:mm:ss tt").ToLower());
-
     }
 
+    return inputCode;                                                   // Returns the selected airline code
 }
 
 
@@ -653,12 +639,13 @@ void ModifyFlightDetails(Terminal terminal)
                 return;
             }
 
-            // ✅ Update the flight in the dictionary
+   
             selectedAirline.Flights[selectedFlight.FlightNumber] = updatedFlight;
             terminal.Flights[selectedFlight.FlightNumber] = updatedFlight;
 
             Console.WriteLine("Special Request Code updated!");
         }
+
         else if (detailChoice == "4") // Modify Boarding Gate
         {
             Console.Write("Enter new Boarding Gate: ");
@@ -668,15 +655,13 @@ void ModifyFlightDetails(Terminal terminal)
             {
                 BoardingGate selectedGate = terminal.BoardingGates[gateName];
 
-                // ✅ Check if the gate is already assigned to another flight
-                if (selectedGate.AssignedFlight != null)
+                if (selectedGate.AssignedFlight != null)         // Check if the gate is already assigned to another flight
                 {
                     Console.WriteLine($"Error: Gate {gateName} is already assigned to Flight {selectedGate.AssignedFlight.FlightNumber}.");
                     return;
                 }
 
-                // ✅ Assign the flight to the gate
-                selectedGate.AssignedFlight = selectedFlight;
+                selectedGate.AssignedFlight = selectedFlight;     // Assign the flight to the gate
 
                 Console.WriteLine($"Boarding Gate updated! Flight {selectedFlight.FlightNumber} is now assigned to Gate {selectedGate.GateName}.");
             }
@@ -698,12 +683,37 @@ void ModifyFlightDetails(Terminal terminal)
         Console.WriteLine($"Expected Departure/Arrival Time: {selectedFlight.ExpectedTime}"); // ✅ Fixed property name
         Console.WriteLine($"Status: {selectedFlight.Status}");
 
-        // ✅ Use `GetType().Name` to determine the special request code (flight type)
-        Console.WriteLine($"Special Request Code: {selectedFlight.GetType().Name.Replace("Flight", "")}");
+        string specialRequest = "None"; // Default if no special request applies
 
-        // ✅ Use BoardingGate.AssignedFlight to display the gate name
-        string assignedGate = terminal.BoardingGates.Values.FirstOrDefault(g => g.AssignedFlight == selectedFlight)?.GateName ?? "Unassigned";
+        if (selectedFlight is CFFTFlight)
+        {
+            specialRequest = "CFFT";
+        }
+        else if (selectedFlight is LWTTFlight)
+        {
+            specialRequest = "LWTT";
+        }
+        else if (selectedFlight is DDJBFlight)
+        {
+            specialRequest = "DDJB";
+        }
+
+        Console.WriteLine($"Special Request Code: {specialRequest}");
+
+
+        string assignedGate = "Unassigned"; // Default value
+
+        foreach (var gate in terminal.BoardingGates.Values)
+        {
+            if (gate.AssignedFlight == selectedFlight)
+            {
+                assignedGate = gate.GateName;
+                break; // Exit loop once we find the assigned gate
+            }
+        }
+
         Console.WriteLine($"Boarding Gate: {assignedGate}");
+
 
     }
     else if (action == "2")
@@ -910,9 +920,10 @@ void ProcessUnassignedFlights(Terminal terminal)
 // main program starts here
 Terminal terminal = new Terminal("Changi Airport Terminal 5");
 LoadAirlines(terminal);  // load airline method
-LoadFlights(terminal); // pass airline to loadflight method
-LoadBoardingGates(terminal);    // load boarding gate method
 LoadBoardingGates(terminal);
+LoadFlights(terminal); // pass airline to loadflight method
+ // load boarding gate method
+
 
 
 
